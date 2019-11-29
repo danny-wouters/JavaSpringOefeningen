@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <title>University Enrollments</title>
+    <title>Users</title>
  
     <style>
         tr:first-child{
@@ -20,19 +20,21 @@
     <h2>List of Employees</h2>  
     <table>
         <tr>
-            <td>NAME</td><td>Joining Date</td><td>Salary</td><td>SSN</td><td></td>
+            <td>ID</td>
+            <td>Username</td>
+            <td></td>
+            <td></td>
         </tr>
-        <c:forEach items="${employees}" var="employee">
+        <c:forEach items="${users}" var="user">
             <tr>
-            <td>${employee.name}</td>
-            <td>${employee.joiningDate}</td>
-            <td>${employee.salary}</td>
-            <td><a href="<c:url value='/edit-${employee.ssn}-employee' />">${employee.ssn}</a></td>
-            <td><a href="<c:url value='/delete-${employee.ssn}-employee' />">delete</a></td>
+            <td>${user.id}</td>
+            <td>${user.username}</td>
+            <td><a href="<c:url value='/edit-${user.id}-user' />">edit</a></td>
+            <td><a href="<c:url value='/delete-${user.id}-user' />">delete</a></td>
             </tr>
         </c:forEach>
     </table>
     <br/>
-    <a href="<c:url value='/new' />">Add New Employee</a>
+    <a href="<c:url value='/new' />">Add New User</a>
 </body>
 </html>
