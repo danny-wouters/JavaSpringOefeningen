@@ -76,9 +76,9 @@ public class User {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof Employee))
+        if (!(obj instanceof User))
             return false;
-        Employee other = (Employee) obj;
+        User other = (User) obj;
         if (id != other.getId())
             return false;
         return true;
@@ -86,6 +86,6 @@ public class User {
  
     @Override
     public String toString() {
-        return "Employee [id=" + id + ", name=" + username + "]";
+        return "User [id=" + id + ", name=" + username + "]";
     }    
 }
