@@ -71,7 +71,7 @@ public class AppController {
          * 
          */
         if(!userService.arePasswordsEqual(user.getPassword(), user.getConfirmPassword())){           
-            FieldError confirmPasswordError =new FieldError("user","confirmpassword",messageSource.getMessage ("non.matching.passwords", new String[]{user.getConfirmPassword()}, Locale.getDefault()));
+            FieldError confirmPasswordError =new FieldError("user","confirmPassword",messageSource.getMessage ("non.matching.passwords", new String[]{user.getConfirmPassword()}, Locale.getDefault()));
             result.addError(confirmPasswordError);
             return "registration";
         }
@@ -107,7 +107,7 @@ public class AppController {
         }
  
         if(!userService.arePasswordsEqual(user.getPassword(), user.getConfirmPassword())){           
-            FieldError confirmPasswordError =new FieldError("user","confirmpassword",messageSource.getMessage ("non.matching.passwords", new String[]{user.getConfirmPassword()}, Locale.getDefault()));
+            FieldError confirmPasswordError =new FieldError("user","confirmPassword",messageSource.getMessage ("non.matching.passwords", new String[]{user.getConfirmPassword()}, Locale.getDefault()));
             result.addError(confirmPasswordError);
             return "registration";
         }
