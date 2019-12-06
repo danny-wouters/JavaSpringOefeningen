@@ -6,10 +6,12 @@ import graduaat.it.www.springmvcoef2.model.User;
 
 public interface UserDao {
     User findById(int id);
- 
-    void saveUser(User user);
      
-    void deleteUserById(int id);
+    User findBySSO(String sso);
      
+    void save(User user);
+
+    void deleteBySSO(String sso);
+
     List<User> findAllUsers();
 }

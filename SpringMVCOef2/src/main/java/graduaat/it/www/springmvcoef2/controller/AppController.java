@@ -2,9 +2,9 @@ package graduaat.it.www.springmvcoef2.controller;
 
 import java.util.List;
 import java.util.Locale;
- 
+
 import javax.validation.Valid;
- 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -14,117 +14,133 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
- 
+
 import graduaat.it.www.springmvcoef2.model.User;
+import graduaat.it.www.springmvcoef2.model.UserProfile;
+import graduaat.it.www.springmvcoef2.service.UserProfileService;
 import graduaat.it.www.springmvcoef2.service.UserService;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
 @RequestMapping("/")
+@SessionAttributes("roles")
 public class AppController {
-    
+
     @Autowired
     UserService userService;
-     
+
+    @Autowired
+    UserProfileService userProfileService;
+
     @Autowired
     MessageSource messageSource;
- 
-    /*
+
+    /**
      * This method will list all existing users.
      */
     @RequestMapping(value = { "/", "/list" }, method = RequestMethod.GET)
     public String listUsers(ModelMap model) {
- 
+
         List<User> users = userService.findAllUsers();
         model.addAttribute("users", users);
-        return "allusers";
+        return "userslist";
     }
- 
-    /*
+
+    /**
      * This method will provide the medium to add a new user.
      */
-    @RequestMapping(value = { "/new" }, method = RequestMethod.GET)
+    @RequestMapping(value = { "/newuser" }, method = RequestMethod.GET)
     public String newUser(ModelMap model) {
         User user = new User();
         model.addAttribute("user", user);
         model.addAttribute("edit", false);
         return "registration";
     }
- 
-    /*
+
+    /**
      * This method will be called on form submission, handling POST request for
-     * saving employee in database. It also validates the user input
+     * saving user in database. It also validates the user input
      */
-    @RequestMapping(value = { "/new" }, method = RequestMethod.POST)
+    @RequestMapping(value = { "/newuser" }, method = RequestMethod.POST)
     public String saveUser(@Valid User user, BindingResult result,
             ModelMap model) {
- 
+
         if (result.hasErrors()) {
             return "registration";
         }
- 
+
         /*
-         * Preferred way to achieve uniqueness of field [ssn] should be implementing custom @Unique annotation 
-         * and applying it on field [ssn] of Model class [Employee].
-         * 
+         * Preferred way to achieve uniqueness of field [sso] should be implementing custom @Unique annotation
+         * and applying it on field [sso] of Model class [User].
+         *
          * Below mentioned peace of code [if block] is to demonstrate that you can fill custom errors outside the validation
          * framework as well while still using internationalized messages.
-         * 
+         *
          */
-        if(!userService.arePasswordsEqual(user.getPassword(), user.getConfirmPassword())){           
-            FieldError confirmPasswordError =new FieldError("user","confirmPassword",messageSource.getMessage ("non.matching.passwords", new String[]{user.getConfirmPassword()}, Locale.getDefault()));
-            result.addError(confirmPasswordError);
+        if(!userService.isUserSSOUnique(user.getId(), user.getSsoId())){
+            FieldError ssoError =new FieldError("user","ssoId",messageSource.getMessage("non.unique.ssoId", new String[]{user.getSsoId()}, Locale.getDefault()));
+            result.addError(ssoError);
             return "registration";
         }
-         
+
         userService.saveUser(user);
- 
-        model.addAttribute("success", "User " + user.getUsername()+ " registered successfully");
-        return "success";
+
+        model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " registered successfully");
+        //return "success";
+        return "registrationsuccess";
     }
- 
- 
-    /*
+
+    /**
      * This method will provide the medium to update an existing user.
      */
-    @RequestMapping(value = { "/edit-{id}-user" }, method = RequestMethod.GET)
-    public String editUser(@PathVariable int id, ModelMap model) {
-        User user = userService.findById(id);
+    @RequestMapping(value = { "/edit-user-{ssoId}" }, method = RequestMethod.GET)
+    public String editUser(@PathVariable String ssoId, ModelMap model) {
+        User user = userService.findBySSO(ssoId);
         model.addAttribute("user", user);
         model.addAttribute("edit", true);
         return "registration";
     }
-     
-    /*
+
+    /**
      * This method will be called on form submission, handling POST request for
      * updating user in database. It also validates the user input
      */
-    @RequestMapping(value = { "/edit-{id}-user" }, method = RequestMethod.POST)
-    public String updateEmployee(@Valid User user, BindingResult result,
-            ModelMap model, @PathVariable int id) {
- 
+    @RequestMapping(value = { "/edit-user-{ssoId}" }, method = RequestMethod.POST)
+    public String updateUser(@Valid User user, BindingResult result,
+            ModelMap model, @PathVariable String ssoId) {
+
         if (result.hasErrors()) {
             return "registration";
         }
- 
-        if(!userService.arePasswordsEqual(user.getPassword(), user.getConfirmPassword())){           
-            FieldError confirmPasswordError =new FieldError("user","confirmPassword",messageSource.getMessage ("non.matching.passwords", new String[]{user.getConfirmPassword()}, Locale.getDefault()));
-            result.addError(confirmPasswordError);
+
+        /*//Uncomment below 'if block' if you WANT TO ALLOW UPDATING SSO_ID in UI which is a unique key to a User.
+        if(!userService.isUserSSOUnique(user.getId(), user.getSsoId())){
+            FieldError ssoError =new FieldError("user","ssoId",messageSource.getMessage("non.unique.ssoId", new String[]{user.getSsoId()}, Locale.getDefault()));
+            result.addError(ssoError);
             return "registration";
-        }
- 
+        }*/
+
         userService.updateUser(user);
- 
-        model.addAttribute("success", "User " + user.getUsername()+ " updated successfully");
-        return "success";
+
+        model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " updated successfully");
+        return "registrationsuccess";
     }
- 
-     
-    /*
-     * This method will delete an employee by it's SSN value.
+
+    /**
+     * This method will delete an user by it's SSOID value.
      */
-    @RequestMapping(value = { "/delete-{id}-user" }, method = RequestMethod.GET)
-    public String deleteUser(@PathVariable int id) {
-        userService.deleteUserById(id);
+    @RequestMapping(value = { "/delete-user-{ssoId}" }, method = RequestMethod.GET)
+    public String deleteUser(@PathVariable String ssoId) {
+        userService.deleteUserBySSO(ssoId);
         return "redirect:/list";
-    }    
+    }
+
+    /**
+     * This method will provide UserProfile list to views
+     */
+    @ModelAttribute("roles")
+    public List<UserProfile> initializeProfiles() {
+        return userProfileService.findAll();
+    }
 }
